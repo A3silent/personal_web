@@ -9,7 +9,7 @@
 
 body {
     font-family: 'JetBrains Mono', monospace;
-    background: linear-gradient(135deg, #2e1e1e 0%, #3e2d2b 100%);
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0f0a 100%);
     color: #e9b599;
     min-height: 100vh;
     display: flex;
@@ -19,6 +19,26 @@ body {
     font-weight: 400;
     letter-spacing: -0.5px;
     padding-top: 17.5vh;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(255, 149, 0, 0.03) 2px,
+            rgba(255, 149, 0, 0.03) 4px
+        );
+    pointer-events: none;
+    z-index: 1;
 }
 
 .container {
@@ -30,6 +50,7 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
+    z-index: 2;
 }
 
 .cube-wrapper {
@@ -190,13 +211,14 @@ body {
 
 .terminal-container {
     display: flex;
-    background: rgba(46, 30, 30, 0.3);
-    border: 3px solid #f4a261;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #ff9500;
     border-radius: 8px;
     height: 400px;
     margin-top: 30px;
     overflow: hidden;
     margin-left: 20px;
+    box-shadow: 0 0 20px rgba(255, 149, 0, 0.1);
 }
 
 .terminal-output {
@@ -282,9 +304,9 @@ body {
 
 .scrollbar-container {
     width: 16px;
-    background: rgba(46, 30, 30, 0.5);
+    background: rgba(0, 0, 0, 0.5);
     position: relative;
-    border-left: 1px solid rgba(244, 162, 97, 0.2);
+    border-left: 1px solid rgba(255, 149, 0, 0.2);
 }
 
 .scrollbar-track {

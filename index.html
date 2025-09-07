@@ -6,7 +6,9 @@
     <title>Personal Terminal</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body tabindex="0">
+    <!-- Hidden input for keyboard capture on macOS -->
+    <input type="text" id="hiddenInput" style="position: absolute; left: -9999px; opacity: 0;" autocomplete="off" />
     <div class="container">
         <div class="cube-wrapper">
             <pre id="cube" class="rotating-cube"></pre>
@@ -31,7 +33,7 @@
             </div>
         </div>
         
-        <button id="modeToggle" class="mode-toggle">Click Mode</button>
+        <button id="modeToggle" class="mode-toggle">中文模式</button>
     </div>
     
     <script src="script.js"></script>

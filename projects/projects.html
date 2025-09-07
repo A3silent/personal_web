@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritz Sun - Projects</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0f0a 100%);
+            color: #e9b599;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            padding: 40px 20px;
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 149, 0, 0.03) 2px,
+                    rgba(255, 149, 0, 0.03) 4px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: #e9b599;
+            text-shadow: 0 0 10px rgba(233, 181, 153, 0.5);
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+        
+        .back-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #ffd6a5;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+            padding: 5px 10px;
+            border: 1px solid transparent;
+        }
+        
+        .back-link:hover {
+            border: 1px solid #f4a261;
+            text-shadow: 0 0 5px #f4a261;
+            background: rgba(244, 162, 97, 0.1);
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .project-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #f4a261;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #f4a261, transparent);
+            transition: left 0.5s;
+        }
+        
+        .project-card:hover::before {
+            left: 100%;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(244, 162, 97, 0.2);
+            background: rgba(244, 162, 97, 0.05);
+        }
+        
+        .project-title {
+            font-size: 1.3rem;
+            color: #ffd6a5;
+            margin-bottom: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .project-tech {
+            color: #f4a261;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .project-description {
+            color: #e9b599;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .project-description li {
+            margin-left: 20px;
+            margin-bottom: 6px;
+            opacity: 0.9;
+            list-style-type: none;
+            position: relative;
+        }
+        
+        .project-description li::before {
+            content: '>';
+            position: absolute;
+            left: -15px;
+            color: #f4a261;
+        }
+        
+        .project-links {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .project-link {
+            color: #f4a261;
+            text-decoration: none;
+            padding: 6px 12px;
+            border: 1px solid #f4a261;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .project-link:hover {
+            background: #f4a261;
+            color: #0a0a0a;
+            box-shadow: 0 0 10px rgba(244, 162, 97, 0.5);
+        }
+        
+        .terminal-prompt {
+            color: #e9b599;
+            margin-top: 60px;
+            text-align: center;
+            font-size: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .terminal-prompt::after {
+            content: '█';
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .image-carousel {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.5s ease-in-out;
+            margin: 15px -20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-top: 1px solid rgba(244, 162, 97, 0.3);
+            border-bottom: 1px solid rgba(244, 162, 97, 0.3);
+        }
+        
+        .carousel-track {
+            display: flex;
+            padding: 10px;
+            gap: 10px;
+            white-space: nowrap;
+        }
+        
+        .carousel-track img {
+            height: 180px;
+            width: auto;
+            object-fit: cover;
+            border: 1px solid rgba(244, 162, 97, 0.2);
+            transition: transform 0.3s;
+        }
+        
+        .carousel-track img:hover {
+            transform: scale(1.05);
+            border-color: #f4a261;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="#" onclick="window.close(); return false;" class="back-link">← Close</a>
+            <h1>// PROJECTS</h1>
+        </div>
+        
+        <div class="projects-grid">
+            <div class="project-card" data-project="silic2">
+                <h2 class="project-title">Silic2 - Doom-like FPS Game</h2>
+                <p class="project-tech">Tech: C++, OpenGL, ImGui</p>
+                <ul class="project-description">
+                    <li>Doom-inspired FPS with pixel-art style visuals</li>
+                    <li>Fast-paced shooting with multiple weapons</li>
+                    <li>Dynamic movement system (sliding, jumping, sprinting)</li>
+                    <li>GPU-driven particle system for effects</li>
+                    <li>Custom map editor with Dear ImGui</li>
+                </ul>
+                <div class="project-links">
+                    <a href="https://github.com/A3silent/silic2" class="project-link">GitHub</a>
+                </div>
+            </div>
+            
+            <div class="project-card" data-project="vulkan-engine">
+                <h2 class="project-title">Simple Vulkan Engine</h2>
+                <p class="project-tech">Tech: C++, Vulkan, CMake, SPIR-V</p>
+                <ul class="project-description">
+                    <li>Lightweight 3D renderer with multiple model loading</li>
+                    <li>Core Vulkan features implementation</li>
+                    <li>Efficient rendering pipeline with shaders</li>
+                    <li>Simple Monte Carlo Ray Tracing and Phong shading for lighting</li>
+                    <li>Dynamic uniform buffers for 3D transformations</li>
+                </ul>
+                <div class="project-links">
+                    <a href="https://github.com/A3silent/Vulkan-Engine" class="project-link">GitHub</a>
+                </div>
+            </div>
+            
+            <div class="project-card" data-project="astronomical">
+                <h2 class="project-title">Astronomical Research</h2>
+                <p class="project-tech">Tech: Python, pandas, NumPy, Matplotlib, Scipy</p>
+                <ul class="project-description">
+                    <li>Star luminosity correlation analysis</li>
+                    <li>Data visualization of astronomical phenomena</li>
+                    <li>Statistical analysis of celestial bodies</li>
+                    <li>Research at UC Berkeley</li>
+                </ul>
+                <div class="project-links">
+                    <a href="https://github.com/aaronsuu/star_luminosity_analysis" class="project-link">GitHub</a>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="terminal-prompt">
+            > Type 'exit' to return to terminal_
+        </div>
+    </div>
+    
+    <script>
+        // Get language from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const lang = urlParams.get('lang') || 'en';
+        
+        // Translations
+        const translations = {
+            en: {
+                title: '// PROJECTS',
+                close: '← Close',
+                projects: [
+                    {
+                        title: 'Silic2 - Doom-like FPS Game',
+                        tech: 'Tech: C++, OpenGL, ImGui',
+                        description: [
+                            'Doom-inspired FPS with pixel-art style visuals',
+                            'Fast-paced shooting with multiple weapons',
+                            'Dynamic movement system (sliding, jumping, sprinting)',
+                            'GPU-driven particle system for effects',
+                            'Custom map editor with Dear ImGui'
+                        ]
+                    },
+                    {
+                        title: 'Simple Vulkan Engine',
+                        tech: 'Tech: C++, Vulkan, CMake, SPIR-V',
+                        description: [
+                            'Lightweight 3D renderer with multiple model loading',
+                            'Core Vulkan features implementation',
+                            'Efficient rendering pipeline with shaders',
+                            'Simple Monte Carlo Ray Tracing and Phong shading for lighting',
+                            'Dynamic uniform buffers for 3D transformations'
+                        ]
+                    },
+                    {
+                        title: 'Astronomical Research',
+                        tech: 'Tech: Python, pandas, NumPy, Matplotlib, Scipy',
+                        description: [
+                            'Star luminosity correlation analysis',
+                            'Data visualization of astronomical phenomena',
+                            'Statistical analysis of celestial bodies',
+                            'Research at UC Berkeley'
+                        ]
+                    }
+                ],
+                prompt: '> Type \'exit\' to return to terminal_'
+            },
+            zh: {
+                title: '// 项目',
+                close: '← 关闭',
+                projects: [
+                    {
+                        title: 'Silic2 - 类Doom FPS游戏',
+                        tech: '技术栈: C++, OpenGL, ImGui',
+                        description: [
+                            '受Doom启发的像素艺术风格FPS',
+                            '快节奏射击，多种武器',
+                            '动态移动系统（滑动、跳跃、冲刺）',
+                            'GPU驱动的粒子系统效果',
+                            '使用Dear ImGui的自定义地图编辑器'
+                        ]
+                    },
+                    {
+                        title: '简单Vulkan引擎',
+                        tech: '技术栈: C++, Vulkan, CMake, SPIR-V',
+                        description: [
+                            '支持多模型加载的轻量级3D渲染器',
+                            '核心Vulkan功能实现',
+                            '带着色器的高效渲染管线',
+                            '简单蒙特卡罗光线追踪和Phong着色照明',
+                            '用于3D变换的动态统一缓冲区'
+                        ]
+                    },
+                    {
+                        title: '天文研究',
+                        tech: '技术栈: Python, pandas, NumPy, Matplotlib, Scipy',
+                        description: [
+                            '恒星光度相关性分析',
+                            '天文现象数据可视化',
+                            '天体统计分析',
+                            '加州大学伯克利分校研究'
+                        ]
+                    }
+                ],
+                prompt: '> 输入 \'e\' 返回终端_'
+            }
+        };
+        
+        // Apply translations
+        document.addEventListener('DOMContentLoaded', function() {
+            const t = translations[lang];
+            
+            // Update header
+            document.querySelector('.header h1').textContent = t.title;
+            document.querySelector('.back-link').textContent = t.close;
+            
+            // Update projects
+            const projectCards = document.querySelectorAll('.project-card');
+            projectCards.forEach((card, index) => {
+                if (t.projects[index]) {
+                    card.querySelector('.project-title').textContent = t.projects[index].title;
+                    card.querySelector('.project-tech').textContent = t.projects[index].tech;
+                    
+                    const descItems = card.querySelectorAll('.project-description li');
+                    descItems.forEach((item, i) => {
+                        if (t.projects[index].description[i]) {
+                            item.textContent = t.projects[index].description[i];
+                        }
+                    });
+                }
+            });
+            
+            // Update terminal prompt
+            document.querySelector('.terminal-prompt').textContent = t.prompt;
+        });
+    </script>
+    <script src="projects.js"></script>
+    <script>
+        // Add terminal-like interactions
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' || (e.key === 'x' && e.ctrlKey)) {
+                window.close();
+            }
+        });
+        
+        // Add typing effect
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'e' || e.key === 'E') {
+                const next = document.querySelector('.terminal-prompt');
+                if (next) {
+                    next.textContent += e.key;
+                    if (next.textContent.toLowerCase().includes('exit')) {
+                        setTimeout(() => {
+                            window.close();
+                        }, 500);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

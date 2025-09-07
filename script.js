@@ -1,5 +1,5 @@
 const terminalOutput = document.getElementById('terminalOutput');
-const userInput = document.getElementById('userInput');
+let userInput = document.getElementById('userInput');
 const cubeElement = document.getElementById('cube');
 const modeToggle = document.getElementById('modeToggle');
 const scrollbarThumb = document.getElementById('scrollbarThumb');
@@ -9,11 +9,14 @@ let commandHistory = [];
 let historyIndex = -1;
 let scrollPosition = 0;
 let maxScroll = 0;
+let waitingForProjectsResponse = false;
+let currentLanguage = 'en';
 
-const commands = {
-    help: {
-        execute: () => {
-            return `
+const translations = {
+    en: {
+        prompt: 'type help to start',
+        commands: {
+            help: `
 Available commands:
   about      - About me
   education  - My educational background
@@ -21,41 +24,238 @@ Available commands:
   projects   - My projects
   resume     - View/download resume
   contact    - Contact information
+  email      - Send email
+  linkedin   - Visit LinkedIn profile
   github     - Visit GitHub profile
-  game       - Game development projects
+  cn/en     - Switch language / 切换语言
   clear      - Clear terminal
 
-Type any command to continue...`;
+Type any command to continue...`,
+            langSwitch: 'Language switched to Chinese / 语言已切换到中文',
+            langSwitchEng: 'Language switched to English / 语言已切换到英文',
+            about: `
+Hi! I'm Ritz Sun, a second-year Computer Engineering student at 
+the University of Waterloo.
+
+I'm especially interested in computer graphics, game development, 
+and exploring new technologies.`,
+            education: `
+Education:
+─────────────────────────────
+• Bachelor of Computer Engineering
+  University of Waterloo, Canada (2023-2028)
+  GPA: 88.1/100.0 [2 term-deans' list]
+
+• Relevant Coursework:
+  - ECE250 Data Structures & Algorithms
+  - ECE252 Systems Programming and Concurrency
+  - ECE150 Fundamentals of Programming`,
+            skills: `
+Technical Skills:
+─────────────────────────────
+Languages:
+  • C++/C
+  • C#
+  • Java
+  • Python
+  
+Tools:
+  • Git/GitHub
+  • AWS
+  • NaviCat, Postman
+  • Linux, Windows, MacOS
+  
+Frameworks/Libraries:
+  • Vulkan, OpenGL, Unity, Unreal Engine 4/5
+  • React, Node.js, Vue.js
+  • Spring Boot
+  • Pandas, NumPy, Matplotlib, Scipy`,
+            projects: `
+Projects:
+─────────────────────────────
+[1] Silic2 - Doom-like FPS Game
+    • Doom-inspired FPS with pixel-art style visuals
+    • Fast-paced shooting, multiple weapons, dynamic movement
+    • GPU-driven particle system for effects
+    • Custom map editor with Dear ImGui
+    Tech: C++, OpenGL, ImGui
+    
+[2] Simple Vulkan Engine  
+    • Lightweight 3D renderer with multiple model loading
+    • Vulkan pipeline with shaders and command buffers
+    • Simple Monte Carlo Ray Tracing and Phong shading for lighting
+    • Dynamic uniform buffers for transformations
+    Tech: C++, Vulkan, CMake, SPIR-V
+    
+[3] Luminosity of Astronomical Research (UC Berkeley)
+    • Star luminosity correlation analysis
+    • Data visualization and analysis
+    • Proficiency in data manipulation and organization
+    Tech: Python, pandas, NumPy, Matplotlib, Scipy
+
+─────────────────────────────
+Would you like to see more details? (y/n)`,
+            contact: `
+Contact Information:
+─────────────────────────────
+📧 Email: A3silent@outlook.com
+   (type 'email' to send an email)
+   
+💼 LinkedIn: linkedin.com/in/ritz-sun-511321290/
+   (type 'linkedin' to open profile)
+   
+🐙 GitHub: github.com/A3silent
+   (type 'github' to open profile)
+   
+📱 Phone: +1 4373606602`,
+            resume: `
+Opening resume...
+
+Resume: docs/Ritz_Resume.pdf`,
+            email: 'Opening email client...',
+            linkedin: 'Opening LinkedIn profile...',
+            github: 'Opening GitHub profile...',
+            projectsOpen: 'Opening projects page...',
+            projectsReturn: 'Returning to terminal...',
+            projectsInvalid: 'Please enter y (yes) or n (no):',
+            notFound: (cmd) => `Command not found: ${cmd}
+Type 'help' for available commands.`
+        },
+        modeButton: '中文模式'
+    },
+    zh: {
+        prompt: '输入 help 开始',
+        commands: {
+            help: `
+可用命令:
+  about      - 关于我
+  education  - 教育背景
+  skills     - 技术技能
+  projects   - 我的项目
+  resume     - 查看/下载简历
+  contact    - 联系信息
+  email      - 发送邮件
+  linkedin   - 访问 LinkedIn 主页
+  github     - 访问 GitHub 主页
+  cn/en     - 切换语言 / Switch language
+  clear      - 清空终端
+
+输入任意命令继续...`,
+            langSwitch: '语言已切换到中文 / Language switched to Chinese',
+            langSwitchEng: '语言已切换到英文 / Language switched to English',
+            about: `
+你好！我是 Ritz Sun，滑铁卢大学计算机工程专业二年级学生。
+
+计算机图形学和游戏开发是我最感兴趣的领域！`,
+            education: `
+教育背景:
+─────────────────────────────
+• 计算机工程学士
+  加拿大滑铁卢大学 (2023-2028)
+  GPA: 88.1/100.0 [2次院长名单]
+
+• 相关课程:
+  - ECE250 数据结构与算法
+  - ECE252 系统编程与并发
+  - ECE150 编程基础`,
+            skills: `
+技术技能:
+─────────────────────────────
+编程语言:
+  • C++/C
+  • C#
+  • Java
+  • Python
+  
+工具:
+  • Git/GitHub
+  • AWS
+  • NaviCat, Postman
+  • Linux, Windows, MacOS
+  
+框架/库:
+  • Vulkan, OpenGL, Unity, Unreal Engine 4/5
+  • React, Node.js, Vue.js
+  • Spring Boot
+  • Pandas, NumPy, Matplotlib, Scipy`,
+            projects: `
+项目:
+─────────────────────────────
+[1] Silic2 - 类Doom FPS游戏
+    • 受Doom启发的像素艺术风格FPS
+    • 快节奏射击，多种武器，动态移动
+    • GPU驱动的粒子系统效果
+    • 使用Dear ImGui的自定义地图编辑器
+    技术栈: C++, OpenGL, ImGui
+    
+[2] 简单Vulkan引擎  
+    • 支持多模型加载的轻量级3D渲染器
+    • Vulkan管线与着色器和命令缓冲区
+    • 简单蒙特卡罗光线追踪和Phong着色照明
+    • 用于变换的动态统一缓冲区
+    技术栈: C++, Vulkan, CMake, SPIR-V
+    
+[3] 天文研究光度分析 (加州大学伯克利分校)
+    • 恒星光度相关性分析
+    • 数据可视化和分析
+    • 熟练的数据操作和组织
+    技术栈: Python, pandas, NumPy, Matplotlib, Scipy
+
+─────────────────────────────
+您想查看更多详情吗? (y/n)`,
+            contact: `
+联系信息:
+─────────────────────────────
+📧 邮箱: A3silent@outlook.com
+   (输入 'email' 发送邮件)
+   
+💼 LinkedIn: linkedin.com/in/ritz-sun-511321290/
+   (输入 'linkedin' 打开主页)
+   
+🐙 GitHub: github.com/A3silent
+   (输入 'github' 打开主页)
+   
+📱 电话: +86 18514040727(CN) +1 4373606602(CAN)`,
+            resume: `
+打开简历中...
+
+简历: docs/Ritz_Resume.pdf`,
+            email: '打开邮件客户端...',
+            linkedin: '打开 LinkedIn 主页...',
+            github: '打开 GitHub 主页...',
+            projectsOpen: '打开项目页面...',
+            projectsReturn: '返回终端...',
+            projectsInvalid: '请输入 y (是) 或 n (否):',
+            notFound: (cmd) => `未找到命令: ${cmd}
+输入 'help' 查看可用命令。`
+        },
+        modeButton: 'English Mode'
+    }
+};
+
+function getTranslation(key, ...args) {
+    const keys = key.split('.');
+    let value = translations[currentLanguage];
+    for (const k of keys) {
+        value = value[k];
+    }
+    return typeof value === 'function' ? value(...args) : value;
+}
+
+const commands = {
+    help: {
+        execute: () => {
+            return getTranslation('commands.help');
         }
     },
     about: {
         execute: () => {
-            return `
-Hi! I'm a passionate developer who loves creating 
-interactive web experiences and exploring new technologies.
-
-I enjoy building things that live on the internet, whether 
-that be websites, applications, or anything in between.
-
-My goal is to always build products that provide 
-pixel-perfect, performant experiences.`;
+            return getTranslation('commands.about');
         }
     },
     education: {
         execute: () => {
-            return `
-Education:
-─────────────────────────────
-• Bachelor of Computer Science
-  University Name (2020-2024)
-  GPA: 3.8/4.0
-  
-• Relevant Coursework:
-  - Data Structures & Algorithms
-  - Web Development
-  - Database Systems
-  - Machine Learning
-  - Software Engineering`;
+            return getTranslation('commands.education');
         }
     },
     edu: {
@@ -63,51 +263,13 @@ Education:
     },
     skills: {
         execute: () => {
-            return `
-Technical Skills:
-─────────────────────────────
-Languages:
-  • JavaScript/TypeScript
-  • Python
-  • Java
-  • C++
-  
-Frontend:
-  • React, Vue.js, Next.js
-  • HTML5, CSS3, Sass
-  • Tailwind CSS
-  
-Backend:
-  • Node.js, Express
-  • Django, Flask
-  • PostgreSQL, MongoDB
-  
-Tools:
-  • Git, Docker
-  • AWS, CI/CD
-  • Webpack, Vite`;
+            return getTranslation('commands.skills');
         }
     },
     projects: {
         execute: () => {
-            return `
-Projects:
-─────────────────────────────
-[1] Terminal Portfolio
-    Interactive terminal-style portfolio
-    Tech: HTML, CSS, JavaScript
-    
-[2] E-commerce Platform
-    Full-stack online shopping platform
-    Tech: React, Node.js, MongoDB
-    
-[3] Task Manager
-    Real-time collaborative task management
-    Tech: Vue.js, Express, Socket.io
-    
-[4] Weather Dashboard
-    Beautiful weather forecast app
-    Tech: React, OpenWeather API`;
+            waitingForProjectsResponse = true;
+            return getTranslation('commands.projects');
         }
     },
     proj: {
@@ -115,61 +277,76 @@ Projects:
     },
     resume: {
         execute: () => {
-            return `
-Resume:
-─────────────────────────────
-Download: resume.pdf
-View online: yoursite.com/resume
-
-Summary:
-Passionate full-stack developer with 3+ years 
-of experience building web applications.
-
-Contact: your.email@example.com`;
+            const resumeFile = currentLanguage === 'zh' ? 'docs/ritz_cn.pdf' : 'docs/Ritz_Resume.pdf';
+            window.open(resumeFile, '_blank');
+            return getTranslation('commands.resume');
         }
     },
     contact: {
         execute: () => {
-            return `
-Contact Information:
-─────────────────────────────
-📧 Email: your.email@example.com
-💼 LinkedIn: linkedin.com/in/yourname
-🐙 GitHub: github.com/yourusername
-🐦 Twitter: @yourhandle
-📱 Phone: +1 (555) 123-4567`;
+            return getTranslation('commands.contact');
+        }
+    },
+    email: {
+        execute: () => {
+            window.open('mailto:A3silent@outlook.com', '_blank');
+            return getTranslation('commands.email');
+        }
+    },
+    linkedin: {
+        execute: () => {
+            window.open('https://linkedin.com/in/ritz-sun-511321290/', '_blank');
+            return getTranslation('commands.linkedin');
         }
     },
     github: {
         execute: () => {
-            window.open('https://github.com/yourusername', '_blank');
-            return 'Opening GitHub profile...';
+            window.open('https://github.com/A3silent', '_blank');
+            return getTranslation('commands.github');
         }
     },
-    game: {
+    cn: {
         execute: () => {
-            return `
-Game Development:
-─────────────────────────────
-[1] Pixel Runner
-    2D platformer game
-    Engine: Unity
-    Status: In Development
-    
-[2] Space Shooter
-    Retro arcade game
-    Tech: HTML5 Canvas, JS
-    Status: Released
-    
-[3] Terminal Quest
-    Text-based adventure
-    Platform: Web Browser
-    Status: Beta Testing
-    
-[4] Puzzle Master
-    Brain training puzzles
-    Platform: Mobile (React Native)
-    Status: Concept Phase`;
+            if (currentLanguage === 'zh') {
+                return '已经是中文模式 / Already in Chinese mode';
+            }
+            currentLanguage = 'zh';
+            
+            // Update mode button text
+            const modeToggle = document.getElementById('modeToggle');
+            if (modeToggle) {
+                modeToggle.textContent = translations[currentLanguage].modeButton;
+            }
+            
+            // Update typed text
+            const typedText = document.querySelector('.typed-text');
+            if (typedText) {
+                typedText.textContent = translations[currentLanguage].prompt;
+            }
+            
+            return getTranslation('commands.langSwitch');
+        }
+    },
+    en: {
+        execute: () => {
+            if (currentLanguage === 'en') {
+                return 'Already in English mode / 已经是英文模式';
+            }
+            currentLanguage = 'en';
+            
+            // Update mode button text
+            const modeToggle = document.getElementById('modeToggle');
+            if (modeToggle) {
+                modeToggle.textContent = translations[currentLanguage].modeButton;
+            }
+            
+            // Update typed text
+            const typedText = document.querySelector('.typed-text');
+            if (typedText) {
+                typedText.textContent = translations[currentLanguage].prompt;
+            }
+            
+            return getTranslation('commands.langSwitchEng');
         }
     },
     clear: {
@@ -362,11 +539,25 @@ function executeCommand(cmd) {
     
     if (trimmedCmd === '') return null;
     
+    // Handle y/n response for projects
+    if (waitingForProjectsResponse) {
+        waitingForProjectsResponse = false;
+        if (trimmedCmd === 'y' || trimmedCmd === 'yes') {
+            // Open projects subpage with current language
+            window.open(`projects/projects.html?lang=${currentLanguage}`, '_blank');
+            return getTranslation('commands.projectsOpen');
+        } else if (trimmedCmd === 'n' || trimmedCmd === 'no') {
+            return getTranslation('commands.projectsReturn');
+        } else {
+            waitingForProjectsResponse = true; // Keep waiting if invalid response
+            return getTranslation('commands.projectsInvalid');
+        }
+    }
+    
     if (commands[trimmedCmd]) {
         return commands[trimmedCmd].execute();
     } else {
-        return `Command not found: ${trimmedCmd}
-Type 'help' for available commands.`;
+        return getTranslation('commands.notFound', trimmedCmd);
     }
 }
 
@@ -407,7 +598,7 @@ function addCommandToTerminal(command, result) {
     const newUserInput = document.getElementById('userInput');
     if (newUserInput) {
         // Update the global reference
-        window.userInput = newUserInput;
+        userInput = newUserInput;
     }
     
     updateScroll();
@@ -439,45 +630,62 @@ function scrollToBottom() {
     updateScroll();
 }
 
+function handleKeyDown(e) {
+    const activeUserInput = document.getElementById('userInput');
+    if (!activeUserInput) return;
+    
+    switch(e.key) {
+        case 'Enter':
+            e.preventDefault();
+            if (currentInput.trim()) {
+                commandHistory.push(currentInput);
+                historyIndex = commandHistory.length;
+                
+                const result = executeCommand(currentInput);
+                addCommandToTerminal(currentInput, result);
+                
+                currentInput = '';
+                activeUserInput.textContent = '';
+            }
+            break;
+            
+        case 'Backspace':
+            e.preventDefault();
+            currentInput = currentInput.slice(0, -1);
+            activeUserInput.textContent = currentInput;
+            break;
+            
+        case 'ArrowUp':
+            e.preventDefault();
+            if (historyIndex > 0) {
+                historyIndex--;
+                currentInput = commandHistory[historyIndex];
+                activeUserInput.textContent = currentInput;
+            }
+            break;
+            
+        case 'ArrowDown':
+            e.preventDefault();
+            if (historyIndex < commandHistory.length - 1) {
+                historyIndex++;
+                currentInput = commandHistory[historyIndex];
+                activeUserInput.textContent = currentInput;
+            } else {
+                historyIndex = commandHistory.length;
+                currentInput = '';
+                activeUserInput.textContent = '';
+            }
+            break;
+    }
+}
+
 function handleKeyPress(e) {
     const activeUserInput = document.getElementById('userInput');
     if (!activeUserInput) return;
     
-    if (e.key === 'Enter') {
-        const command = currentInput;
-        if (command.trim()) {
-            commandHistory.push(command);
-            historyIndex = commandHistory.length;
-            
-            const result = executeCommand(command);
-            addCommandToTerminal(command, result);
-            
-            currentInput = '';
-            activeUserInput.textContent = '';
-        }
-    } else if (e.key === 'Backspace') {
+    // Only handle printable characters
+    if (e.key && e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
-        currentInput = currentInput.slice(0, -1);
-        activeUserInput.textContent = currentInput;
-    } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        if (historyIndex > 0) {
-            historyIndex--;
-            currentInput = commandHistory[historyIndex];
-            activeUserInput.textContent = currentInput;
-        }
-    } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        if (historyIndex < commandHistory.length - 1) {
-            historyIndex++;
-            currentInput = commandHistory[historyIndex];
-            activeUserInput.textContent = currentInput;
-        } else {
-            historyIndex = commandHistory.length;
-            currentInput = '';
-            activeUserInput.textContent = '';
-        }
-    } else if (e.key.length === 1) {
         currentInput += e.key;
         activeUserInput.textContent = currentInput;
     }
@@ -558,15 +766,135 @@ function onDragEnd() {
 }
 
 modeToggle.addEventListener('click', function() {
-    alert('Terminal mode is the primary interface. Use keyboard or click on commands to interact!');
+    // Toggle language
+    currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+    
+    // Update button text
+    this.textContent = translations[currentLanguage].modeButton;
+    
+    // Update typed text
+    const typedText = document.querySelector('.typed-text');
+    if (typedText) {
+        typedText.textContent = translations[currentLanguage].prompt;
+    }
 });
 
-document.addEventListener('keydown', handleKeyPress);
+// Debug mode - set to true to see keyboard events in console
+const DEBUG_MODE = false;
+
+// Setup keyboard event listeners
+document.addEventListener('keydown', function(e) {
+    if (DEBUG_MODE) console.log('keydown:', e.key, e.keyCode);
+    handleKeyDown(e);
+});
+
+document.addEventListener('keypress', function(e) {
+    if (DEBUG_MODE) console.log('keypress:', e.key, e.charCode);
+    handleKeyPress(e);
+});
+
+// Alternative input method using a hidden input field
+const hiddenInput = document.getElementById('hiddenInput');
+
+if (hiddenInput) {
+    // Keep focus on the hidden input
+    function maintainFocus() {
+        if (document.activeElement !== hiddenInput) {
+            hiddenInput.focus();
+        }
+    }
+    
+    // Set initial focus
+    hiddenInput.focus();
+    
+    // Maintain focus on click
+    document.addEventListener('click', function(e) {
+        if (e.target !== hiddenInput) {
+            e.preventDefault();
+            hiddenInput.focus();
+        }
+    });
+    
+    // Handle input in the hidden field
+    hiddenInput.addEventListener('beforeinput', function(e) {
+        const activeUserInput = document.getElementById('userInput');
+        if (!activeUserInput) return;
+        
+        if (e.inputType === 'insertText' && e.data) {
+            currentInput += e.data;
+            activeUserInput.textContent = currentInput;
+        } else if (e.inputType === 'deleteContentBackward') {
+            currentInput = currentInput.slice(0, -1);
+            activeUserInput.textContent = currentInput;
+        }
+    });
+    
+    // Handle special keys in the hidden input
+    hiddenInput.addEventListener('keydown', function(e) {
+        const activeUserInput = document.getElementById('userInput');
+        if (!activeUserInput) return;
+        
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentInput.trim()) {
+                commandHistory.push(currentInput);
+                historyIndex = commandHistory.length;
+                
+                const result = executeCommand(currentInput);
+                addCommandToTerminal(currentInput, result);
+                
+                currentInput = '';
+                activeUserInput.textContent = '';
+                hiddenInput.value = '';
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (historyIndex > 0) {
+                historyIndex--;
+                currentInput = commandHistory[historyIndex];
+                activeUserInput.textContent = currentInput;
+                hiddenInput.value = currentInput;
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (historyIndex < commandHistory.length - 1) {
+                historyIndex++;
+                currentInput = commandHistory[historyIndex];
+                activeUserInput.textContent = currentInput;
+                hiddenInput.value = currentInput;
+            } else {
+                historyIndex = commandHistory.length;
+                currentInput = '';
+                activeUserInput.textContent = '';
+                hiddenInput.value = '';
+            }
+        }
+    });
+    
+    // Keep input synchronized
+    hiddenInput.addEventListener('input', function(e) {
+        const activeUserInput = document.getElementById('userInput');
+        if (activeUserInput) {
+            currentInput = e.target.value;
+            activeUserInput.textContent = currentInput;
+        }
+    });
+    
+    // Focus on page visibility change
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            setTimeout(() => hiddenInput.focus(), 100);
+        }
+    });
+    
+    // Periodic focus check
+    setInterval(maintainFocus, 500);
+}
 
 createRotatingCube();
 
 function typeWriter() {
-    const text = "type help to start";
+    const text = translations[currentLanguage].prompt;
     const element = document.querySelector('.typed-text');
     let index = 0;
     
@@ -616,4 +944,11 @@ window.addEventListener('load', () => {
     typeWriter();
     glitchNameSwitch();
     updateScroll();
+    
+    // Ensure focus on load
+    const hiddenInput = document.getElementById('hiddenInput');
+    if (hiddenInput) {
+        hiddenInput.focus();
+        console.log('Terminal ready - start typing!');
+    }
 });
