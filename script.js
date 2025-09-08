@@ -27,7 +27,7 @@ Available commands:
   email      - Send email
   linkedin   - Visit LinkedIn profile
   github     - Visit GitHub profile
-  cn/en     - Switch language / 切换语言
+  cn/en      - Switch language / 切换语言
   clear      - Clear terminal
 
 Type any command to continue...`,
@@ -137,7 +137,7 @@ Type 'help' for available commands.`
   email      - 发送邮件
   linkedin   - 访问 LinkedIn 主页
   github     - 访问 GitHub 主页
-  cn/en     - 切换语言 / Switch language
+  cn/en      - 切换语言 / Switch language
   clear      - 清空终端
 
 输入任意命令继续...`,
