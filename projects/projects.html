@@ -416,15 +416,7 @@
         // Add typing effect
         document.addEventListener('keypress', function(e) {
             if (e.key === 'e' || e.key === 'E') {
-                const next = document.querySelector('.terminal-prompt');
-                if (next) {
-                    next.textContent += e.key;
-                    if (next.textContent.toLowerCase().includes('exit')) {
-                        setTimeout(() => {
-                            window.close();
-                        }, 500);
-                    }
-                }
+                window.close();
             }
         });
     </script>
