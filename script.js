@@ -34,11 +34,11 @@ Type any command to continue...`,
             langSwitch: 'Language switched to Chinese / 语言已切换到中文',
             langSwitchEng: 'Language switched to English / 语言已切换到英文',
             about: `
-Hi! I'm Ritz Sun, a second-year Computer Engineering student at 
-the University of Waterloo.
+Hi! I'm Ritz Sun, a sophomore majoring in 
+Computer Engineering at the University of Waterloo in Canada
 
-I'm especially interested in computer graphics, game development, 
-and exploring new technologies.`,
+I'm especially passionate about computer programming, game 
+development, and exploring cutting-edge technologies.`,
             education: `
 Education:
 ─────────────────────────────
@@ -144,19 +144,22 @@ Type 'help' for available commands.`
             langSwitch: '语言已切换到中文 / Language switched to Chinese',
             langSwitchEng: '语言已切换到英文 / Language switched to English',
             about: `
-你好！我是 Ritz Sun，滑铁卢大学计算机工程专业二年级学生。
+你好！我是孙承泽，滑铁卢大学计算机工程专业二年级学生。
 
-计算机图形学和游戏开发是我最感兴趣的领域！`,
+我是一名热爱游戏与技术的开发者，具备扎实的 C++/Python 编程能力 与图形渲染、物理模拟、数据分析等项目经验。
+
+我热衷于探索 计算机图形学、游戏引擎与交互设计，对粒子特效、实时渲染、光照与物理反馈 有深入实践与理解。同时，
+我具备较强的自驱力与创造力，能快速学习新技术并将其应用于项目迭代中。`,
             education: `
 教育背景:
 ─────────────────────────────
 • 计算机工程学士
   加拿大滑铁卢大学 (2023-2028)
-  GPA: 88.1/100.0 [2次院长名单]
+  GPA: 88.1/100.0 [2次年级前10%]
 
 • 相关课程:
   - ECE250 数据结构与算法
-  - ECE252 系统编程与并发
+  - ECE252 系统与并发式编程
   - ECE150 编程基础`,
             skills: `
 技术技能:
