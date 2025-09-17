@@ -4,11 +4,11 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Microsoft YaHei', '微软雅黑', 'JetBrains Mono', monospace !important;
+    font-family: 'JetBrains Mono', 'Microsoft YaHei', '微软雅黑', monospace !important;
 }
 
 body {
-    font-family: 'Microsoft YaHei', '微软雅黑', 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'Microsoft YaHei', '微软雅黑', monospace;
     background: linear-gradient(135deg, #0a0a0a 0%, #1a0f0a 100%);
     color: #e9b599;
     min-height: 100vh;
@@ -85,7 +85,7 @@ body::before {
     margin-bottom: 30px;
     font-weight: 500;
     letter-spacing: -1px;
-    font-family: 'Microsoft YaHei', '微软雅黑', 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'Microsoft YaHei', '微软雅黑', monospace;
     text-align: center;
 }
 
@@ -339,7 +339,7 @@ body::before {
     color: #f4a261;
     padding: 8px 16px;
     cursor: pointer;
-    font-family: 'Microsoft YaHei', '微软雅黑', 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'Microsoft YaHei', '微软雅黑', monospace;
     font-size: 11px;
     transition: all 0.3s ease;
     border-radius: 15px;
