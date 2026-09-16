@@ -5,11 +5,13 @@ const modeToggle = document.getElementById('modeToggle');
 const scrollbarThumb = document.getElementById('scrollbarThumb');
 
 let currentInput = '';
+/** @type {string[]} */
 let commandHistory = [];
 let historyIndex = -1;
 let scrollPosition = 0;
 let maxScroll = 0;
 let waitingForProjectsResponse = false;
+/** @type {'en' | 'zh'} */
 let currentLanguage = 'en';
 
 const translations = {
@@ -19,6 +21,7 @@ const translations = {
             help: `
 Available commands:
   about      - About me
+  experience - Work experience (exp)
   education  - My educational background
   skills     - Technical skills
   projects   - My projects
@@ -34,42 +37,81 @@ Type any command to continue...`,
             langSwitch: 'Language switched to Chinese / 语言已切换到中文',
             langSwitchEng: 'Language switched to English / 语言已切换到英文',
             about: `
-Hi! I'm Ritz Sun, a sophomore majoring in 
-Computer Engineering at the University of Waterloo in Canada
+Hi! I'm Chengze (Ritz) Sun, a Computer Engineering student
+at the University of Waterloo, based in Waterloo, Canada.
 
-I'm especially passionate about computer programming, game 
-development, and exploring cutting-edge technologies.`,
+I work on gameplay, game engines, graphics, and GPU systems.
+My co-op experience spans HoYoverse (miHoYo), Digital Extremes,
+CoreAVI (Lynx), and Huawei Canada.
+
+Type 'experience' to explore my work or 'projects' for personal projects.`,
+            experience: `
+Work Experience | Co-op:
+─────────────────────────────
+[1] HoYoverse (miHoYo)
+    Gameplay / Engine Engineer | May 2026 - Aug 2026
+    • Built gameplay telemetry for a pre-production UE5 title:
+      match pacing, kill heatmaps, and ability-selection analysis.
+    • Built Slate tools for UDP-based LAN lobby creation and
+      discovery across editor instances, PIE, and standalone clients.
+    • Added a packaged-game LAN login and dedicated lobby flow,
+      reusing networking systems across editor and packaged builds.
+    • Contributed automated changelist reviews and daily build
+      performance analysis to agent-assisted engineering workflows.
+    • Led end-to-end testing of an internal AI production platform
+      for code assistance, 3D content, and animation generation.
+
+[2] Digital Extremes
+    Gameplay / Graphics Engineer | Jan 2026 - Apr 2026
+    • Implemented Warframe gameplay and runtime systems in C++
+      within the proprietary Evolution engine.
+    • Built dialogue cameras with dynamic transitions and
+      interpolation, integrated with runtime rendering updates.
+    • Contributed gameplay features and system reworks to
+      Warframe: The Shadowgrapher.
+
+[3] CoreAVI (Lynx)
+    Graphics Software Engineer | May 2025 - Aug 2025
+    • Investigated Vulkan CTS failures and hangs, added debugging
+      instrumentation, and reduced non-passing driver tests.
+    • Debugged GPU crashes and validation errors involving
+      synchronization, descriptors, and pipeline setup.
+    • Helped build a compositor demo rendering Vulkan SC,
+      OpenGL SC, and OpenGL windows simultaneously.
+
+[4] Huawei Technologies Co., Ltd. Canada
+    GPU Driver Engineer | Sept 2024 - Dec 2024
+    • Evaluated rendering technologies including D3D12 work graphs
+      and summarized implications for future driver design.
+    • Implemented and profiled demo shaders to address bottlenecks.
+    • Fixed Vulkan/OpenGL rendering issues involving command
+      buffers, resource layouts, and synchronization.`,
             education: `
 Education:
 ─────────────────────────────
-• Bachelor of Computer Engineering
-  University of Waterloo, Canada (2023-2028)
-  GPA: 88.1/100.0 [2 term-deans' list]
+• University of Waterloo | Waterloo, Ontario
+  Candidate for BASc in Computer Engineering
+  Sept 2023 - May 2028 (expected)
 
-• Relevant Coursework:
-  - ECE250 Data Structures & Algorithms
-  - ECE252 Systems Programming and Concurrency
-  - ECE150 Fundamentals of Programming`,
+• University of California, Berkeley | California, USA
+  Study in Computer Science and Astronomy
+  Jun 2022 - Aug 2022`,
             skills: `
 Technical Skills:
 ─────────────────────────────
 Languages:
-  • C++/C
-  • C#
-  • Java
-  • Python
-  
-Tools:
-  • Git/GitHub
-  • AWS
-  • NaviCat, Postman
-  • Linux, Windows, MacOS
-  
-Frameworks/Libraries:
-  • Vulkan, OpenGL, Unity, Unreal Engine 4/5
-  • React, Node.js, Vue.js
-  • Spring Boot
-  • Pandas, NumPy, Matplotlib, Scipy`,
+  C/C++, C#, Java, Python, Swift, Lua
+
+GPU / Systems:
+  UE5, CUDA, Vulkan, OpenGL, GLSL/SPIR-V
+  GPU memory management, synchronization
+
+ML / Compute:
+  PyTorch, NumPy
+
+Tools / Frameworks:
+  Nsight Compute, Nsight Systems, RenderDoc
+  Xcode, Linux, Git, CMake`,
             projects: `
 Projects:
 ─────────────────────────────
@@ -107,18 +149,19 @@ Contact Information:
 🐙 GitHub: github.com/A3silent
    (type 'github' to open profile)
    
-📱 Phone: +1 4373606602`,
+📱 Phone: +1 437 360 6602
+📍 Location: Waterloo, Canada`,
             resume: `
 Opening resume...
 
-Resume: docs/Ritz_Resume.pdf`,
+Resume: docs/Ritz_Sun_Resume.pdf`,
             email: 'Opening email client...',
             linkedin: 'Opening LinkedIn profile...',
             github: 'Opening GitHub profile...',
             projectsOpen: 'Opening projects page...',
             projectsReturn: 'Returning to terminal...',
             projectsInvalid: 'Please enter y (yes) or n (no):',
-            notFound: (cmd) => `Command not found: ${cmd}
+            notFound: (/** @type {string} */ cmd) => `Command not found: ${cmd}
 Type 'help' for available commands.`
         },
         modeButton: '中文模式'
@@ -129,6 +172,7 @@ Type 'help' for available commands.`
             help: `
 可用命令:
   about      - 关于我
+  experience - 工作经历 (exp)
   education  - 教育背景
   skills     - 技术技能
   projects   - 我的项目
@@ -144,43 +188,65 @@ Type 'help' for available commands.`
             langSwitch: '语言已切换到中文 / Language switched to Chinese',
             langSwitchEng: '语言已切换到英文 / Language switched to English',
             about: `
-你好！我是孙承泽，滑铁卢大学计算机工程专业二年级学生。
+你好！我是孙承泽（Chengze / Ritz Sun），滑铁卢大学计算机工程专业学生，现居加拿大滑铁卢。
 
-我是一名热爱游戏与技术的开发者，具备扎实的 C++/Python 编程能力与图形渲染、物理模拟、数据分析等项目经验。
+我的实践领域涵盖游戏玩法、游戏引擎、图形渲染与 GPU 系统，曾在米哈游（HoYoverse）、Digital Extremes、CoreAVI（Lynx）和华为加拿大完成 Co-op 实习。
 
-我热衷于探索计算机图形学、游戏引擎与交互设计，对粒子特效、实时渲染、光照与物理反馈有深入实践与理解。同时，
-我具备较强的自驱力与创造力，能快速学习新技术并将其应用于项目迭代中。`,
+输入 'experience' 查看工作经历，或输入 'projects' 查看个人项目。`,
+            experience: `
+工作经历 | Co-op 实习:
+─────────────────────────────
+[1] 米哈游（HoYoverse）
+    游戏玩法 / 引擎工程师 | 2026年5月 - 8月
+    • 为预研阶段的 UE5 游戏开发对局节奏、击杀热力图及技能选择分析工具。
+    • 使用 Slate 构建基于 UDP 的局域网大厅创建与发现工具，支持编辑器实例、PIE 和独立客户端。
+    • 为打包版本添加局域网登录与专用大厅流程，复用编辑器与打包版本的网络系统。
+    • 参与自动化代码变更审查及每日构建性能分析流程建设。
+    • 推动内部 AI 生产平台的端到端测试，覆盖代码辅助、3D 内容与动画生成。
+
+[2] Digital Extremes
+    游戏玩法 / 图形工程师 | 2026年1月 - 4月
+    • 在自研 Evolution 引擎中使用 C++ 开发 Warframe 玩法与运行时系统。
+    • 实现支持动态切换与插值的对话摄像机，集成运行时视图与渲染更新。
+    • 参与 Warframe: The Shadowgrapher 的玩法开发与多个模块的系统重构。
+
+[3] CoreAVI（Lynx）
+    图形软件工程师 | 2025年5月 - 8月
+    • 排查 Vulkan CTS 失败与挂起问题，添加调试工具，减少驱动测试失败项。
+    • 分析 GPU 崩溃与验证错误，定位同步、描述符使用及管线配置问题。
+    • 参与图形合成器演示，同时渲染 Vulkan SC、OpenGL SC 和 OpenGL 窗口。
+
+[4] 华为加拿大
+    GPU 驱动工程师 | 2024年9月 - 12月
+    • 评估 D3D12 Work Graphs 等渲染技术及其对未来驱动设计的影响。
+    • 编写与优化演示着色器，使用性能分析工具定位瓶颈。
+    • 调试命令缓冲区、资源布局与同步，修复 Vulkan/OpenGL 渲染问题。`,
             education: `
 教育背景:
 ─────────────────────────────
-• 计算机工程学士
-  加拿大滑铁卢大学 (2023-2028)
-  GPA: 88.1/100.0 [2次年级前10%]
+• 滑铁卢大学 | 加拿大安大略省滑铁卢
+  计算机工程应用科学学士在读（BASc）
+  2023年9月 - 2028年5月（预计）
 
-• 相关课程:
-  - ECE250 数据结构与算法
-  - ECE252 系统与并发式编程
-  - ECE150 编程基础`,
+• 加州大学伯克利分校 | 美国加利福尼亚州
+  计算机科学与天文学学习经历
+  2022年6月 - 2022年8月`,
             skills: `
 技术技能:
 ─────────────────────────────
 编程语言:
-  • C++/C
-  • C#
-  • Java
-  • Python
-  
-工具:
-  • Git/GitHub
-  • AWS
-  • NaviCat, Postman
-  • Linux, Windows, MacOS
-  
-框架/库:
-  • Vulkan, OpenGL, Unity, Unreal Engine 4/5
-  • React, Node.js, Vue.js
-  • Spring Boot
-  • Pandas, NumPy, Matplotlib, Scipy`,
+  C/C++, C#, Java, Python, Swift, Lua
+
+GPU / 系统:
+  UE5, CUDA, Vulkan, OpenGL, GLSL/SPIR-V
+  GPU 内存管理、同步
+
+机器学习 / 计算:
+  PyTorch, NumPy
+
+工具 / 框架:
+  Nsight Compute, Nsight Systems, RenderDoc
+  Xcode, Linux, Git, CMake`,
             projects: `
 项目:
 ─────────────────────────────
@@ -218,31 +284,36 @@ Type 'help' for available commands.`
 🐙 GitHub: github.com/A3silent
    (输入 'github' 打开主页)
    
-📱 电话: +86 18514040727(CN) +1 4373606602(CAN)`,
+📱 电话: +1 437 360 6602
+📍 所在地: 加拿大滑铁卢`,
             resume: `
 打开简历中...
 
-简历: docs/Ritz_Resume.pdf`,
+简历: docs/Ritz_Sun_Resume.pdf`,
             email: '打开邮件客户端...',
             linkedin: '打开 LinkedIn 主页...',
             github: '打开 GitHub 主页...',
             projectsOpen: '打开项目页面...',
             projectsReturn: '返回终端...',
             projectsInvalid: '请输入 y (是) 或 n (否):',
-            notFound: (cmd) => `未找到命令: ${cmd}
+            notFound: (/** @type {string} */ cmd) => `未找到命令: ${cmd}
 输入 'help' 查看可用命令。`
         },
         modeButton: 'English Mode'
     }
 };
 
-function getTranslation(key, ...args) {
-    const keys = key.split('.');
-    let value = translations[currentLanguage];
-    for (const k of keys) {
-        value = value[k];
-    }
-    return typeof value === 'function' ? value(...args) : value;
+/**
+ * @param {`commands.${keyof typeof translations.en.commands}`} key
+ * @param {string} [command] Input to include in a command-not-found message.
+ * @returns {string}
+ */
+function getTranslation(key, command = '') {
+    const commandKey = /** @type {keyof typeof translations.en.commands} */ (
+        key.slice('commands.'.length)
+    );
+    const value = translations[currentLanguage].commands[commandKey];
+    return typeof value === 'function' ? value(command) : value;
 }
 
 const commands = {
@@ -255,6 +326,12 @@ const commands = {
         execute: () => {
             return getTranslation('commands.about');
         }
+    },
+    experience: {
+        execute: () => getTranslation('commands.experience')
+    },
+    exp: {
+        execute: () => commands.experience.execute()
     },
     education: {
         execute: () => {
@@ -280,7 +357,7 @@ const commands = {
     },
     resume: {
         execute: () => {
-            const resumeFile = currentLanguage === 'zh' ? 'docs/ritz_cn.pdf' : 'docs/Ritz_Resume.pdf';
+            const resumeFile = 'docs/Ritz_Sun_Resume.pdf';
             window.open(resumeFile, '_blank');
             return getTranslation('commands.resume');
         }
